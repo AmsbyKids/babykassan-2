@@ -20,7 +20,7 @@ async function setupOpenAI() {
     openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
     });
-    
+    // test 
     // Verifiera att nyckeln fungerar
     const models = await openai.models.list();
     if (models) {
