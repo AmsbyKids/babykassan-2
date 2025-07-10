@@ -123,7 +123,8 @@ const baseSystemMessage = `Du är Alice – en varm, kunnig och oumbärlig rådg
 - Undvik emojis med många tecken, t.ex. 🗖️ – använd hellre 💛.
 - Börja varje sektion direkt – ingen tomrad efter rubrik.
 - Avsluta svaret utan onödiga mellanslag.
-`;
+- Skriv alla tabeller vänsterjusterat (ingen centerjustering).
+- Använd kortare kolumnnamn för att undvika radbrytning i mobil (t.ex. "Netto FP" istället för "Netto FP per månad").
 
 async function queryOpenAI(message) {
   try {
