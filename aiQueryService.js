@@ -160,7 +160,7 @@ const completion = await openai.chat.completions.create({
     ...trimmedHistory
   ],
   temperature: 0.7,
-  max_tokens: 1000
+  max_tokens: 2000
 });
 
 
