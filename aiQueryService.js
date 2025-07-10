@@ -157,7 +157,7 @@ Idag den ${verifiedDate.fullDate} kan du skapa en konkret och varm planering som
         ...conversationHistory
       ],
       temperature: 0.7,
-      max_tokens: 3000
+      max_tokens: 1000
     });
 
     const reply = completion.choices[0].message.content;
