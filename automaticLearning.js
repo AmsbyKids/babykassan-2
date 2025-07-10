@@ -284,7 +284,7 @@ async function collectNewInformation() {
     
     try {
       const analysisResponse = await openai.chat.completions.create({
-        model: 'gpt-4o',
+        model: 'gpt-4.1',
         messages: [
           {
             role: 'system',
@@ -323,7 +323,7 @@ async function collectNewInformation() {
           console.log('🧠 Verifierar information med extra OpenAI-förfrågan...');
           
           const verificationResponse = await openai.chat.completions.create({
-            model: 'gpt-4o',
+            model: 'gpt-4.1',
             messages: [
               {
                 role: 'system',
@@ -341,7 +341,7 @@ Granska följande information: ${analysisResult}`
               }
             ],
             temperature: 0.3,
-            max_tokens: 800
+            max_tokens: 1000
           });
           
           const verificationResult = verificationResponse.choices[0].message.content;

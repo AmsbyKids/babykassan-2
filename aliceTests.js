@@ -196,7 +196,7 @@ DETALJERADE INSTRUKTIONER:
         
         // Anropa OpenAI API
         const response = await openai.chat.completions.create({
-          model: 'gpt-4o',
+          model: 'gpt-4.1',
           messages: [
             {
               role: 'system',
@@ -208,7 +208,7 @@ DETALJERADE INSTRUKTIONER:
             }
           ],
           temperature: 0.3,
-          max_tokens: 500
+          max_tokens: 1000
         });
         
         const answer = response.choices[0].message.content;

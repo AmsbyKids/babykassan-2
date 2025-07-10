@@ -111,13 +111,13 @@ Idag den ${verifiedDate.fullDate} kan du skapa en konkret och varm planering som
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4.1",
       messages: [
         { role: "system", content: enhancedPrompt },
         ...conversationHistory
       ],
       temperature: 0.7,
-      max_tokens: 1500
+      max_tokens: 1000
     });
 
     const reply = completion.choices[0].message.content;
