@@ -289,7 +289,8 @@ function calculateDailyBenefit(sgi) {
   const dagligErsättningRå = (justeradSGI / DAGAR_PER_ÅR) * ERSÄTTNINGSNIVÅ;
   
   // Justera till maximal dagersättning om den överstiger den
-  const dagligErsättning = Math.min(dagligErsättningRå, MAX_DAGLIG_ERSÄTTNING;
+  const dagligErsättning = Math.min(dagligErsättningRå, MAX_DAGLIG_ERSÄTTNING);
+
   
   // Avrunda till närmaste heltal
   return Math.round(dagligErsättning);
