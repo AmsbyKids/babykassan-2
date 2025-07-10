@@ -5,7 +5,6 @@ const crypto = require('crypto');
 // Initialize Supabase client
 const supabase = createClient(
   'https://kfspsyuskvgopobngbxq.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmc3BzeXVza3Znb3BvYm5nYnhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI5OTY3OTUsImV4cCI6MjA1ODU3Mjc5NX0.rcsIY0u1WWSmPGwtPrK_SUYu4Yuk0PNANOcEwe111m0'
 );
 
 async function logInteraction(data) {
