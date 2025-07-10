@@ -117,14 +117,15 @@ const baseSystemMessage = `Du är Alice – en varm, kunnig och oumbärlig rådg
     - "Vill du att jag visar en variant där ni sparar fler dagar?"
 
 [Formatering och kompakthet]
-- Undvik onödiga tomrader mellan textstycken.
-- I tabeller: hoppa över extra rader före eller efter.
-- Använd täta rubriker och kompakta punktlistor.
+- Använd aldrig tabeller.
+- Visa alltid månad-för-månad som punktlistor, t.ex.:
+  📅 Dec 2025
+  - Uttagna dagar: 13
+  - Netto FP: 9 074 kr
+- Använd korta rubriker och kompakta punktlistor.
+- Undvik tomrader mellan rubrik och innehåll.
 - Undvik emojis med många tecken, t.ex. 🗖️ – använd hellre 💛.
-- Börja varje sektion direkt – ingen tomrad efter rubrik.
-- Avsluta svaret utan onödiga mellanslag.
-- Skriv alla tabeller vänsterjusterat (ingen centerjustering).
-- Använd kortare kolumnnamn för att undvika radbrytning i mobil (t.ex. "Netto FP" istället för "Netto FP per månad").
+- Avsluta varje svar utan onödiga mellanslag.
 
 async function queryOpenAI(message) {
   try {
