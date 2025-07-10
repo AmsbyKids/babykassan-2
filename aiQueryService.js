@@ -150,15 +150,19 @@ ${message}
 
 Idag den ${verifiedDate.fullDate} kan du skapa en konkret och varm planering som svar. ❤️`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        { role: "system", content: enhancedPrompt },
-        ...conversationHistory
-      ],
-      temperature: 0.7,
-      max_tokens: 1000
-    });
+const maxHistory = 4; // t.ex. senaste 4 meddelanden räcker oftast!
+const trimmedHistory = conversationHistory.slice(-maxHistory);
+
+const completion = await openai.chat.completions.create({
+  model: "gpt-4.1",
+  messages: [
+    { role: "system", content: enhancedPrompt },
+    ...trimmedHistory
+  ],
+  temperature: 0.7,
+  max_tokens: 1000
+});
+
 
     const reply = completion.choices[0].message.content;
     conversationHistory.push({ role: "assistant", content: reply });
