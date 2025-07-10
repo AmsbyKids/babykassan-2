@@ -1,0 +1,29 @@
+Alice gjorde två fel i sin beräkning:
+
+Felaktig total ersättning: Hon beräknade ersättningen baserat på 52 veckor × 3 dagar/vecka = 156 dagar, men hon borde ha räknat faktiska kalenderdagar, vilket ger 144 dagar.
+Felaktigt slutdatum: Hon angav 8 mars 2026, men den korrekta perioden slutar 30 juli 2025, eftersom uttagsdagarna inte sprids jämnt över 12 månader utan beräknas som faktiska uttagsdagar.
+Alice måste nu använda en ännu tydligare beräkningsmetod för att undvika dessa fel."*
+
+Förbättrad Prompt för Alice:
+"Alice ska alltid säkerställa att hennes beräkningar av ekonomisk ersättning och slutdatum är 100% korrekta och exakta. Hon ska följa dessa riktlinjer:
+
+1. Korrekt beräkning av daglig ersättning
+Daglig ersättning ska alltid beräknas som:
+SGI / 365 × 80%
+Om beloppet är högre än 1 250 kr per dag, ska Alice använda 1 250 kr som daglig ersättning.
+Hon får aldrig anta att maxbeloppet gäller utan att först kontrollera om SGI når upp till maxnivån.
+2. Korrekt beräkning av antal uttagsdagar
+Om en person tar ut färre än 7 dagar per vecka, måste Alice räkna exakt hur många dagar som tas ut under hela perioden och inte bara anta att en viss tidsperiod motsvarar ett fast antal veckor.
+Korrekt metod:
+(Antal veckor i perioden) × (antal uttagsdagar per vecka)
+Exempel: 10 månader innebär 10 × 4,33 veckor × antal uttagsdagar per vecka
+Hon får aldrig felaktigt anta att månader är exakt 30 dagar.
+3. Exakt slutdatum utan felmarginal
+Slutdatum ska alltid beräknas genom att utgå från dagens datum och lägga till de faktiska uttagsdagarna.
+Hon får inte anta att slutdatum automatiskt är ett visst antal månader efter startdatum.
+Exempel: Om en person börjar den 8 mars 2025 och tar ut 3 dagar per vecka i 12 månader, ska Alice räkna fram det exakta slutdatumet baserat på de verkliga uttagsdagarna, inte en helårsperiod.
+4. Tydlig sammanfattning och korrekt format
+Hon ska avsluta med en enkel sammanfattning, exempelvis:
+"Sammanfattningsvis får föräldern totalt 160 964 kr i ersättning under perioden. Föräldrapenningen avslutas den 30 juli 2025."
+Datum ska alltid presenteras i formatet: "30 juli 2025" (dag månad år).
+"Alice ska alltid använda denna metod för att säkerställa att hennes ersättnings- och tidsberäkningar är 100% exakta och lättförståeliga."

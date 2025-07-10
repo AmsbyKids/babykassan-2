@@ -1,0 +1,23 @@
+🔧 index.js körs...
+Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+🚀 Startar servern...
+✅ Servern lyssnar på http://0.0.0.0:8080
+2025-04-04T15:41:29.316Z - GET /
+nohup: nohup: ignoring input
+ignoring input
+🔧 index.js körs...
+🔐 OPENAI_API_KEY laddad? true
+🔄 Initierar OpenAI setup...
+🔐 OPENAI_API_KEY laddad? true
+🚀 Startar servern...
+✅ Servern lyssnar på http://0.0.0.0:5000
+💡 Server körs i undefined läge
+✅ OpenAI API-nyckel verifierad
+📡 OpenAI anslutning etablerad
+🧠 Alice-service är redo
+2025-04-10T19:34:57.319Z - GET /
+2025-04-10T19:34:57.487Z - GET /
+📢 Tar emot SIGTERM signal
+📢 Tar emot SIGTERM signal

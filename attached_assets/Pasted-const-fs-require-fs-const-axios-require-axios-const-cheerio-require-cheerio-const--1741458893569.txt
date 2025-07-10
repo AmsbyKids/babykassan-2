@@ -1,0 +1,119 @@
+const fs = require('fs');
+const axios = require('axios');
+const cheerio = require('cheerio');
+const { createAssistant } = require('./openai.service');
+const OpenAI = require('openai');
+const { DateTime } = require("luxon");
+
+// Initiera OpenAI-klienten
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Lista över betrodda källor
+const trustedSources = [
+  {
+    name: 'Försäkringskassan - Föräldrapenning',
+    url: 'https://www.forsakringskassan.se/privatperson/foralder/foraldrapenning',
+    selectors: 'article, .content-area, main, p, h1, h2, h3, li'
+  },
+  {
+    name: 'Försäkringskassan - Nya regler 2025',
+    url: 'https://www.forsakringskassan.se/nyhetsarkiv', 
+    selectors: 'article, .content-area, .news-list, .news-item, h2, h3, p'
+  }
+];
+
+// Maxgräns för SGI enligt Försäkringskassan
+const MAX_SGI = 588000;
+const ersättningsnivå = 0.8;
+const maxDagligErsättning = 1250;
+const dagarPerÅr = 365;
+const veckorPerMånad = 4.33;
+
+// Funktion för att beräkna exakt antal uttagsdagar och ersättning
+function calculateParentalLeave(sgi, startDate, months1, daysPerWeek1, months2, daysPerWeek2) {
+    let justeradSGI = Math.min(sgi, MAX_SGI);
+    let dagligErsättning = Math.min((justeradSGI / dagarPerÅr) * ersättningsnivå, maxDagligErsättning);
+
+    let veckor1 = months1 * veckorPerMånad;
+    let veckor2 = months2 * veckorPerMånad;
+    let uttagsdagar1 = Math.round(veckor1 * daysPerWeek1);
+    let uttagsdagar2 = Math.round(veckor2 * daysPerWeek2);
+    let totalDagar = uttagsdagar1 + uttagsdagar2;
+
+    let ersättning1 = uttagsdagar1 * dagligErsättning;
+    let ersättning2 = uttagsdagar2 * dagligErsättning;
+    let totalErsättning = ersättning1 + ersättning2;
+
+    let startDatum = DateTime.fromISO(startDate);
+    let slutDatum = startDatum.plus({ days: totalDagar }).toFormat("dd MMMM yyyy");
+
+    return {
+        totalErsättning,
+        totalDagar,
+        slutDatum
+    };
+}
+
+// Hämtar och sparar information från alla betrodda källor
+async function collectNewInformation() {
+  console.log(`🔄 Startar automatisk inlärning ${new Date().toISOString()}`);
+
+  let officialData = {};
+  try {
+    if (fs.existsSync('official_data.json')) {
+      officialData = JSON.parse(fs.readFileSync('official_data.json', 'utf8'));
+    }
+  } catch (err) {
+    console.error('Kunde inte läsa official_data.json:', err);
+  }
+
+  let learningLog = [];
+  try {
+    if (fs.existsSync('learning_log.json')) {
+      learningLog = JSON.parse(fs.readFileSync('learning_log.json', 'utf8'));
+    }
+  } catch (err) {
+    console.error('Kunde inte läsa learning_log.json:', err);
+    learningLog = [];
+  }
+
+  let newInformation = '';
+  let latestUpdateDate = new Date().toISOString();
+
+  for (const source of trustedSources) {
+    try {
+      console.log(`🔍 Söker information från ${source.name}: ${source.url}`);
+      const response = await axios.get(source.url);
+      const $ = cheerio.load(response.data);
+
+      let pageContent = '';
+      $(source.selectors).each((_, el) => {
+        pageContent += $(el).text() + ' ';
+      });
+
+      if (pageContent.length > 100) {
+        newInformation += `\n\n--- INFORMATION FRÅN ${source.name.toUpperCase()} ---\n${pageContent}`;
+        console.log(`✅ Hittade relevant information från ${source.name} (${pageContent.length} tecken)`);
+
+        learningLog.push({
+          timestamp: new Date().toISOString(),
+          source: source.name,
+          url: source.url,
+          content_length: pageContent.length,
+          content_summary: pageContent.substring(0, 150) + '...'
+        });
+      } else {
+        console.log(`ℹ️ Ingen relevant information hittades från ${source.name}`);
+      }
+    } catch (error) {
+      console.error(`❌ Fel vid hämtning från ${source.name}:`, error.message);
+    }
+  }
+
+  if (newInformation.length > 100) {
+    console.log('🧠 Analyserar ny information med OpenAI...');
+
+    try {
+      const analysisResponse

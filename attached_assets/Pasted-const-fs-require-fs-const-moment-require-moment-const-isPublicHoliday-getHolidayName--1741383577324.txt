@@ -1,0 +1,78 @@
+const fs = require("fs");
+const moment = require("moment");
+const { isPublicHoliday, getHolidayName } = require("./swedishDateCalculator");
+
+const createAssistant = async (openai) => {
+  const assistantFilePath = "assistant.json";
+  if (!fs.existsSync(assistantFilePath)) {
+    // Skapa en fil
+    const file = await openai.files.create({
+      file: fs.createReadStream("kunskapgbt.docx"),
+      purpose: "assistants",
+    });
+
+    // Skapa en vektorstorlek som inkluderar vår fil
+    let vectorStore = await openai.beta.vectorStores.create({
+      name: "Chat Demo",
+      file_ids: [file.id],
+    });
+
+    // Hämta dagens datum och kalenderinformation
+    const today = new Date();
+    const formattedDate = moment(today).format('YYYY-MM-DD');
+    const isHoliday = isPublicHoliday(today);
+    const holidayName = isHoliday ? getHolidayName(today) : "inte en röd dag";
+    const dayOfWeek = ["söndag", "måndag", "tisdag", "onsdag", "torsdag", "fredag", "lördag"][today.getDay()];
+    
+    // Skapa dynamiska instruktioner med dagens datum
+    const dynamicInstructions = `Alice är en AI som kombinerar djup kunskap inom kodning och föräldrapenning. 
+      Den är programmerad för att ge exceptionellt användarvänliga och precisa svar, oavsett om frågorna rör algoritmutveckling, apputveckling eller ekonomisk planering för föräldraledighet.
+      Alice vet att dagens datum är ${formattedDate}, som är en ${dayOfWeek} och ${isHoliday ? `en röd dag (${holidayName})` : "inte en röd dag"} i Sverige.
+      Den drar nytta av realtidsdata och noggrant utvalda källor för att ge skräddarsydda råd baserade på information från användarnas frågeformulär. 
+      Med en intuitiv förståelse för användarnas behov, erbjuder den hjälp med allt från grundläggande programmeringsfrågor till komplexa scenarier inom föräldrapenning. 
+      Den är utrustad för att hämta specifik information från betrodda källor som www.forsakringskassan.se för att ge de mest exakta och relevanta svaren baserade på kundens inlämnade frågeformulär. 
+      Den är programmerad att spara och återkalla information från tidigare interaktioner för att ge ännu mer detaljerade och anpassade råd. 
+      Svaren är strukturerade i stycken för bättre läsbarhet och monetära belopp anges i 'kr' istället för 'SEK' för att passa den svenska kontexten. 
+      Använd dessa belopp när du gör beräkningen: Aktuella belopp Prisbasbelopp och andra belopp som är aktuella för olika ersättningar och bidrag. 
+      Prisbasbelopp 2024 Prisbasbeloppet för år 2024 är 57 300 kronor. 
+      Prisbasbeloppet används för att beräkna många av ersättningarna du kan ha rätt till från Försäkringskassan. 
+      Det gäller från januari varje år utifrån prisutvecklingen i samhället. 
+      Inkomstbasbelopp 2024 Inkomstbasbeloppet för år 2024 är 76 200 kronor. 
+      Inkomstbasbeloppet används för att beräkna några av ersättningarna du kan ha rätt till från Försäkringskassan. 
+      Det gäller från januari varje år utifrån inkomstutvecklingen i samhället. 
+      Sjukpenninggrundande inkomst (SGI) Högsta möjliga SGI: 573 000 kronor. 
+      Lägsta möjliga SGI: 13 700 kronor. 
+      Den sjukpenninggrundande inkomsten (SGI) kan vara högst 10 gånger prisbasbeloppet och lägst 24 procent av prisbasbeloppet. 
+      Den ska Alltid utgå från lönetaket och prisbasbeloppet när den tar fram förslagen och beräknar kundernas föräldrapenning. 
+      Beloppen ska alltid redovisas i nettobelopp. 
+      Samt lönetillägget från arbetsgivaren ska också beräknas på nettobelopp. 
+      Huvudfokuset är att utifrån den informationen den får, kalkylera hur länge kunden kan vara hemma samt hur mycket pengar de får per månad i netto. 
+      Samla all info från www.foraldrainfo.se och använd som databas när du ska svara på frågor om föräldrapenning. 
+      Den ska räkna med att man måste ta ut 5 dagar i veckan år 2 för att få behålla sin SGI.`;
+
+    // Skapa assistenten
+    const assistant = await openai.beta.assistants.create({
+      name: "Chat Demo",
+      instructions: dynamicInstructions,
+      tools: [{ type: "file_search" }],
+      tool_resources: { file_search: { vector_store_ids: [vectorStore.id] } },
+      model: "gpt-4o",
+    });
+
+    // Skriv assistent till fil
+    fs.writeFileSync(assistantFilePath, JSON.stringify(assistant));
+    return assistant;
+  } else {
+    // Läs assistent från fil
+    const assistant = JSON.parse(fs.readFileSync(assistantFilePath));
+    return assistant;
+  }
+};
+
+// Ny funktion för datumberäkning
+const getFutureDate = (query) => {
+  return dateUtils.calculateFutureDate(query);
+};
+
+// Exportera funktionerna
+module.exports = { createAssistant, getFutureDate };

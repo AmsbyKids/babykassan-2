@@ -1,0 +1,72 @@
+ Steg 1: Lägg till en funktion som upptäcker att användaren inte har semester
+js
+Kopiera
+Redigera
+function detectNoVacation(text) {
+  const patterns = [
+    'ingen semester',
+    'har inga semesterdagar',
+    'har inte semester kvar',
+    'kan inte ta semester',
+    'semester är slut',
+    'har slut på semester',
+    'finns ingen semester kvar'
+  ];
+  const lower = text.toLowerCase();
+  return patterns.some(pattern => lower.includes(pattern));
+}
+🧠 Steg 2: Modifiera systemPrompt innan du skickar till OpenAI
+Leta upp platsen i din kod där du skapar din systemPrompt eller lägger till systemmeddelanden till messages/promptMessages. Lägg in detta direkt efter att du har mottagit användarens inmatning (userInput eller liknande):
+
+js
+Kopiera
+Redigera
+if (detectNoVacation(userInput)) {
+  systemPrompt += `
+Användaren har uppgett att hen inte har några semesterdagar kvar att ta ut.
+Det är mycket viktigt att du speglar detta i ditt svar.
+
+👉 Skriv det på ett varmt och empatiskt sätt, gärna i sektionen 📌 Viktigt att tänka på eller ✅ Rekommenderad plan.
+
+Exempel på formulering:
+“Eftersom du inte har några semesterdagar kvar, blir det extra viktigt att planera dina föräldradagar klokt 💛”
+
+Svara aldrig neutralt eller opersonligt om detta nämns. Visa att du lyssnar och förstår användarens verklighet.
+  `;
+}
+💡 Om du använder messages = [...] i GPT-4-anropet, så kan du istället lägga detta som ett nytt system-meddelande i messages.unshift({ role: "system", content: systemPrompt }).
+
+✅ Exempel på implementation i queryOpenAI()
+Här är en minimal, sammansatt version:
+
+js
+Kopiera
+Redigera
+async function queryOpenAI(userInput) {
+  let systemPrompt = "Du är en varm, kunnig och empatisk rådgivare som hjälper föräldrar att planera sin föräldraledighet. Svara med struktur: 📅 💸 📌 ✅ 💬";
+
+  if (detectNoVacation(userInput)) {
+    systemPrompt += `
+Användaren har uppgett att hen inte har några semesterdagar kvar att ta ut.
+Det är mycket viktigt att du speglar detta i ditt svar.
+
+👉 Skriv det på ett varmt och empatiskt sätt, gärna i sektionen 📌 Viktigt att tänka på eller ✅ Rekommenderad plan.
+
+Exempel på formulering:
+“Eftersom du inte har några semesterdagar kvar, blir det extra viktigt att planera dina föräldradagar klokt 💛”
+`;
+  }
+
+  const messages = [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userInput }
+  ];
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages,
+    temperature: 0.7
+  });
+
+  return completion.choices[0].message.content;
+}

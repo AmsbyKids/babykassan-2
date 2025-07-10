@@ -1,0 +1,73 @@
+<!-- 🚀 Alice Chat-widget med automatiskt välkomstmeddelande -->
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  #alice-bubble {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #FF6598;
+    color: white;
+    padding: 14px 18px;
+    border-radius: 50px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 9999;
+    border: none;
+  }
+
+  #alice-chat-widget {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 400px;
+    height: 700px;
+    background-color: #fff;
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+    z-index: 9998;
+  }
+
+  #alice-chat-widget iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+</style>
+
+<div id="alice-chat-widget">
+  <iframe id="alice-iframe" src="https://8383ea9c-cbfe-427b-852d-3510d679c86c-00-13m4uxcwu6um5.riker.replit.dev:8080/" allow="clipboard-write"></iframe>
+</div>
+
+<button id="alice-bubble">💬 Chatta med Alice</button>
+
+<script>
+  const bubble = document.getElementById("alice-bubble");
+  const chat = document.getElementById("alice-chat-widget");
+  const iframe = document.getElementById("alice-iframe");
+
+  function sendWelcomeMessage() {
+    iframe.contentWindow.postMessage({
+      type: "incoming-message",
+      message: "Hej jag heter Alice och jag är BabyKassans AI-assistent! Jag finns här för att svara på alla dina frågor om föräldrapenning. Vill du veta vilket belopp du kan få, hur länge du kan vara hemma eller vad reglerna säger? Ställ din fråga så vägleder jag dig. 👶✨"
+    }, "*");
+  }
+
+  // Öppna chatt automatiskt
+  window.addEventListener("DOMContentLoaded", () => {
+    chat.style.display = "flex";
+    // Skicka meddelande när iframe är redo
+    setTimeout(sendWelcomeMessage, 1000); // liten delay för att säkerställa laddning
+  });
+
+  // Klick för att visa/dölja chatt
+  bubble.addEventListener("click", () => {
+    const isVisible = chat.style.display === "flex";
+    chat.style.display = isVisible ? "none" : "flex";
+    if (!isVisible) setTimeout(sendWelcomeMessage, 500);
+  });
+</script>

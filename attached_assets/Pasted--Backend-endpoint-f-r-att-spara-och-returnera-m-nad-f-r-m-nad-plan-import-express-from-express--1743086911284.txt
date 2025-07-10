@@ -1,0 +1,114 @@
+// ✅ Backend-endpoint för att spara och returnera månad-för-månad-plan
+import express from 'express';
+import { createClient } from '@supabase/supabase-js';
+import { calculatePlanOptions, generateMonthByMonthPlan } from './planCalculator.js';
+
+const router = express.Router();
+
+// Supabase-klient
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+
+// POST /api/plan - skapar och sparar en plan
+router.post('/api/plan', async (req, res) => {
+  const {
+    userId,
+    sessionId,
+    plan_start,
+    plan_slut,
+    dagar_per_vecka,
+    sgi,
+    kommun,
+    full_plan_text,
+    json_plan,
+    netto_per_manad,
+    brutto_per_manad,
+    kvarvarande_dagar
+  } = req.body;
+
+  if (!userId && !sessionId) {
+    return res.status(400).json({ error: 'userId eller sessionId krävs.' });
+  }
+
+  const { data, error } = await supabase.from('plans').insert([
+    {
+      user_id: userId || null,
+      session_id: sessionId || null,
+      plan_start,
+      plan_slut,
+      dagar_per_vecka,
+      sgi,
+      kommun,
+      full_plan_text,
+      json_plan,
+      netto_per_manad,
+      brutto_per_manad,
+      kvarvarande_dagar
+    }
+  ]);
+
+  if (error) {
+    console.error('Fel vid sparning:', error);
+    return res.status(500).json({ error: error.message });
+  }
+
+  res.status(200).json({ message: 'Planen har sparats', data });
+});
+
+// GET /api/plan/auto - generera en personlig plan automatiskt
+router.get('/api/plan/auto', (req, res) => {
+  const sgi = parseInt(req.query.sgi);
+  const kommun = req.query.kommun || 'Stockholm';
+  const dagarKvar = parseInt(req.query.dagarKvar) || 480;
+  const minNetto = parseInt(req.query.minNetto) || 12000;
+  const maxManader = parseInt(req.query.maxManader) || 14;
+  const startAr = parseInt(req.query.startAr) || 2025;
+  const startManad = parseInt(req.query.startManad) || 7; // juli
+
+  if (!sgi || !kommun) {
+    return res.status(400).json({ error: 'För att kunna räkna behöver jag både SGI och kommun.' });
+  }
+
+  // Skattetabell kan i framtiden hämtas dynamiskt per kommun
+  const skatt = {
+    'Stockholm': 0.32,
+    'Göteborg': 0.3111,
+    'Malmö': 0.3242,
+    'Umeå': 0.33
+  };
+
+  const kommunSkatt = skatt[kommun] || 0.32;
+
+  const dagersattning = ((sgi * 12) / 365) * 0.97 * 0.8;
+  const alternativ = calculatePlanOptions({ sgi, kommunSkatt, maxManader, minNetto, dagarKvar });
+
+  if (alternativ.length === 0) {
+    return res.status(404).json({ message: 'Inget alternativ uppfyller kraven.' });
+  }
+
+  const forsta = alternativ[0];
+  const plan = generateMonthByMonthPlan({
+    startManad,
+    startAr,
+    dagarPerVecka: forsta.dagarPerVecka,
+    antalManader: maxManader,
+    dagersattning,
+    kommunSkatt
+  });
+
+  const text = `Här är ett förslag:\n- ${forsta.dagarPerVecka} dagar/vecka\n- Brutto: ${forsta.bruttoPerManad} kr/mån\n- Netto: ${forsta.nettoPerManad} kr/mån\n- Kvarvarande dagar efter perioden: ${forsta.kvarvarandeDagar}\n\n📅 Månad för månad:\n` + plan.map(p => `• ${p.manad} – ${p.dagar} dagar – ${p.netto} kr netto`).join('\n') + '\n\nVill du att jag visar fler alternativ också?';
+
+  res.json({
+    plan_start: `${startManad} ${startAr}`,
+    plan_slut: `${startManad + maxManader - 1 > 12 ? 'månad okänd' : startManad + maxManader - 1} ${startAr + Math.floor((startManad + maxManader - 1)/12)}`,
+    dagar_per_vecka: forsta.dagarPerVecka,
+    sgi,
+    kommun,
+    full_plan_text: text,
+    json_plan: plan,
+    netto_per_manad: forsta.nettoPerManad,
+    brutto_per_manad: forsta.bruttoPerManad,
+    kvarvarande_dagar: forsta.kvarvarandeDagar
+  });
+});
+
+export default router;

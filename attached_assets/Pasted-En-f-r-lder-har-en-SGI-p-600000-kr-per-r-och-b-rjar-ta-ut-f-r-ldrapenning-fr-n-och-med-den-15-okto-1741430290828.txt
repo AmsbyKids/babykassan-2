@@ -1,0 +1,93 @@
+En förälder har en SGI på 600000 kr per år och börjar ta ut föräldrapenning från och med den 15 oktober 2025.Hen planerar att ta ut 5 dagar per vecka i 5 månader, men efter de första 5 månaderna minskar hen uttaget till 3 dagar per vecka i ytterligare 7 månader.Hur mycket kommer hen att få totalt i ersättning under denna period?Beräkna också det exakta slutdatumet baserat på startdatumet och ge en kort sammanfattning i slutet."
+
+Du sade:
+För att beräkna ersättningen:
+
+Första 5 månaderna (15 oktober 2025 - 14 mars 2026):
+
+SGI: 600,000 kr per år vilket är 50,000 kr per månad.
+Ersättning per dag: ca 80 % av SGI per dag, vilket är 1,250 kr (maxbelopp) eftersom SGI är högre än det maximalt ersättningsbara.
+Antal arbetsdagar per vecka: 5 dagar.
+Totalt antal veckor under 5 månader: 22 veckor.
+Ersättning under första 5 månaderna:
+(22 \text{ veckor} \times 5 \text{ dagar/vecka} \times 1,250 \text{ kr/dag} = 137,500 \text{ kr})
+
+Nästa 7 månader (15 mars 2026 - 14 oktober 2026):
+
+Ersättning per dag: Maxbeloppet 1,250 kr.
+Antal arbetsdagar per vecka: 3 dagar.
+Totalt antal veckor under 7 månader: Uppskattat till 30 veckor.
+Ersättning under de följande 7 månaderna:
+(30 \text{ veckor} \times 3 \text{ dagar/vecka} \times 1,250 \text{ kr/dag} = 112,500 \text{ kr})
+
+Total ersättning under hela perioden:
+(137,500 \text{ kr} + 112,500 \text{ kr} = 250,000 \text{ kr})
+
+Slutdatum för planeringen är den 14 oktober 2026.
+
+Sammanfattning:
+Föräldern kommer att få totalt 250,000 kr i ersättning under perioden 15 oktober 2025 till 14 oktober 2026, baserat på att ta ut föräldrapenning 5 dagar per vecka i 5 månader och därefter 3 dagar per vecka i 7 månader, med en SGI som kvalificerar för maximala dagpenningen på 1,250 kr .
+ChatGPT sade:
+
+Analyserat
+python
+Visa alltid detaljer
+
+Kopiera
+# Ingångsvärden
+sgi = 600000  # Årlig SGI i kronor
+ersättningsnivå = 0.8  # 80% av SGI
+dagar_per_år = 365  # Antal dagar per år
+max_daglig_ersättning = 1250  # Maxbelopp per dag
+
+# Beräkning av daglig ersättning
+daglig_ersättning = min((sgi / dagar_per_år) * ersättningsnivå, max_daglig_ersättning)
+
+# Period 1: Första 5 månaderna (5 dagar per vecka)
+dagar_per_vecka_1 = 5
+veckor_per_månad = 4.33  # Genomsnittligt antal veckor per månad
+månader_1 = 5  # Första perioden i månader
+total_veckor_1 = månader_1 * veckor_per_månad
+total_dagar_1 = round(total_veckor_1 * dagar_per_vecka_1)
+total_ersättning_1 = total_dagar_1 * daglig_ersättning
+
+# Period 2: Nästa 7 månader (3 dagar per vecka)
+dagar_per_vecka_2 = 3
+månader_2 = 7  # Andra perioden i månader
+total_veckor_2 = månader_2 * veckor_per_månad
+total_dagar_2 = round(total_veckor_2 * dagar_per_vecka_2)
+total_ersättning_2 = total_dagar_2 * daglig_ersättning
+
+# Total beräkning
+total_dagar = total_dagar_1 + total_dagar_2
+total_ersättning = total_ersättning_1 + total_ersättning_2
+
+# Beräkning av slutdatum
+startdatum = datetime(2025, 10, 15)  # Startdatum
+slutdatum = startdatum + timedelta(days=total_dagar)
+
+# Resultat
+total_ersättning, total_dagar, slutdatum.strftime("%d %B %Y")
+Resultat
+(248750, 199, '02 May 2026')
+Dina beräkningar innehåller ett fel i slutdatumet, vilket behöver korrigeras:
+
+Korrigerade värden:
+✔ Total ersättning: 248 750 kr (avrundat) istället för 250 000 kr
+✔ Totalt antal uttagsdagar: 199 dagar istället för det uppskattade antalet i ditt svar
+✔ Slutdatum: 2 maj 2026 istället för 14 oktober 2026
+
+Vad som behöver korrigeras:
+Felaktig total ersättning
+
+Din beräkning gav 250 000 kr, men den korrekta summan är 248 750 kr.
+Skillnaden beror på avrundningar i daglig ersättning och faktiska uttagsdagar.
+Felaktigt slutdatum
+
+Din beräkning angav 14 oktober 2026, men den korrekta tidsperioden slutar den 2 maj 2026.
+Felet beror på att du räknade veckor och månader som fasta perioder istället för att räkna exakta uttagsdagar.
+Eftersom personen först tar ut 5 dagar per vecka i 5 månader och sedan 3 dagar per vecka i 7 månader, tar det 199 faktiska uttagsdagar att slutföra perioden, vilket slutar 2 maj 2026, inte oktober.
+Korrigerad sammanfattning:
+"Sammanfattningsvis får föräldern totalt 248 750 kr i ersättning under perioden. Föräldrapenningen avslutas den 2 maj 2026."
+
+Alice behöver säkerställa att hon beräknar slutdatum utifrån faktiska uttagsdagar och inte uppskattade veckor eller kalendermånader!

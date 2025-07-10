@@ -1,0 +1,178 @@
+<!-- 🚀 Alice Chat-widget med automatiskt välkomstmeddelande -->
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  #alice-bubble {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #FF6598;
+    color: white;
+    padding: 14px 18px;
+    border-radius: 50px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 9999;
+    border: none;
+  }
+
+  #alice-chat-widget {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 400px;
+    height: 700px;
+    background-color: #fff;
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+    z-index: 9998;
+  }
+
+  #alice-chat-header {
+    padding: 15px;
+    background-color: #FF6598;
+    color: white;
+    font-family: 'Baloo 2', cursive;
+  }
+
+  #alice-chat-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .message {
+    margin: 10px 0;
+    padding: 10px 15px;
+    border-radius: 15px;
+    max-width: 80%;
+  }
+
+  .user-message {
+    background: #FF6598;
+    color: white;
+    margin-left: auto;
+  }
+
+  .assistant-message {
+    background: #fdf8f3;
+    margin-right: auto;
+  }
+
+  #alice-input-container {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+  }
+
+  #alice-message-input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #FF6598;
+    border-radius: 25px;
+    font-family: 'Baloo 2', cursive;
+  }
+
+  #alice-send-button {
+    padding: 12px 24px;
+    background: #FF6598;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'Baloo 2', cursive;
+  }
+</style>
+
+<div id="alice-chat-widget">
+  <div id="alice-chat-header">
+    💬 Alice - BabyKassans AI-assistent
+  </div>
+  <div id="alice-chat-container"></div>
+  <div id="alice-input-container">
+    <input type="text" id="alice-message-input" placeholder="Skriv ditt meddelande här...">
+    <button id="alice-send-button">Skicka</button>
+  </div>
+</div>
+
+<button id="alice-bubble">💬 Chatta med Alice</button>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const bubble = document.getElementById("alice-bubble");
+  const chat = document.getElementById("alice-chat-widget");
+  const messageInput = document.getElementById("alice-message-input");
+  const sendButton = document.getElementById("alice-send-button");
+  const chatContainer = document.getElementById("alice-chat-container");
+
+  if (bubble) {
+    bubble.addEventListener('click', () => {
+      chat.style.display = chat.style.display === 'none' ? 'flex' : 'none';
+      if (chat.style.display === 'flex') {
+        showWelcomeMessage();
+      }
+    });
+  }
+
+  function addMessage(text, isUser) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
+    messageDiv.classList.add(isUser ? 'user-message' : 'assistant-message');
+    messageDiv.textContent = text;
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const message = messageInput.value.trim();
+    if (!message) return;
+
+    addMessage(message, true);
+    messageInput.value = '';
+
+    try {
+      const response = await fetch('https://babykassan-ai.repl.co/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: message,
+          userId: 'user-' + Date.now()
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        addMessage(data.answer, false);
+      } else {
+        addMessage("Tyvärr kunde jag inte behandla ditt meddelande just nu. Vänligen försök igen.", false);
+      }
+    } catch (error) {
+      console.error('Fel:', error);
+      addMessage("Ett fel uppstod. Vänligen försök igen.", false);
+    }
+  }
+
+  if (sendButton) {
+    sendButton.addEventListener('click', sendMessage);
+  }
+
+  if (messageInput) {
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+  }
+
+  function showWelcomeMessage() {
+    addMessage("Hej! Jag heter Alice och jag är BabyKassans AI-assistent. Jag finns här för att svara på alla dina frågor om föräldrapenning. Vill du veta vilket belopp du kan få, hur länge du kan vara hemma eller vad reglerna säger? Ställ din fråga så vägleder jag dig. 👶✨", false);
+  }
+});
+</script>

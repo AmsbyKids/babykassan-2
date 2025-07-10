@@ -1,0 +1,136 @@
+HELA queryOpenAI() – stabil och Replit-vänlig
+js
+Kopiera
+Redigera
+const OpenAI = require("openai");
+const fs = require("fs");
+
+let openai;
+let assistant;
+
+// Sätt upp OpenAI och skapa eller återanvänd assistent
+async function setupOpenAI() {
+  if (!process.env.OPENAI_API_KEY) {
+    console.error("⚠️ OPENAI_API_KEY saknas i miljövariabler!");
+    process.exit(1);
+  }
+
+  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+  const { loadOrCreateAssistant } = require("./openai.service");
+  assistant = await loadOrCreateAssistant(openai);
+
+  console.log(`✅ OpenAI konfigurerad med assistent: ${assistant.id}`);
+  return true;
+}
+
+// Anropa OpenAI med fråga och kontext
+async function queryOpenAI(query, contextInfo = '') {
+  try {
+    if (!openai || !assistant) {
+      const success = await setupOpenAI();
+      if (!success) return { success: false, answer: "Kunde inte ansluta till AI-tjänsten." };
+    }
+
+    const { getVerifiedCurrentDate } = require('./swedishDateCalculator');
+    const verifiedDateData = getVerifiedCurrentDate();
+
+    const systemDate = new Date();
+    const monthNames = ['januari', 'februari', 'mars', 'april', 'maj', 'juni',
+                        'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
+    const weekdayNames = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
+
+    const humanReadableDate = `${systemDate.getDate()} ${monthNames[systemDate.getMonth()]} ${systemDate.getFullYear()}`;
+    const weekday = weekdayNames[systemDate.getDay()];
+    const isoDate = systemDate.toISOString().split('T')[0];
+
+    // Datumblock (kritisk logik, men som ren text)
+    const criticalDateBlock = `
+=== ALICES DATUMKONFIGURATION ===
+
+✅ DAGENS DATUM: ${humanReadableDate} (${weekday})
+✅ ISO: ${isoDate}
+⛔ "8 mars" är förbjudet i alla former
+
+📌 ALLA SVAR MÅSTE BÖRJA MED:
+"Idag den ${humanReadableDate} kan jag..."
+
+📌 MAX SGI 2025: 588 000 kr
+📌 ERSÄTTNING: SGI ÷ 365 × 0,8 (max 1250 kr/dag)
+📌 NETTO: Brutto × 0,68 (ca 32% skatt)
+
+=== SLUT PÅ DATUMBLOCK ===
+`;
+
+    // Kombinera allt i en användarsträng
+    const userMessage = `
+ANVÄNDARENS FRÅGA:
+${query}
+
+${criticalDateBlock}
+
+ANVÄNDARKONTEXT:
+${contextInfo}
+`;
+
+    // Skapa en ny tråd
+    const thread = await openai.beta.threads.create();
+
+    // Lägg till meddelande i tråden
+    await openai.beta.threads.messages.create(thread.id, {
+      role: "user",
+      content: userMessage
+    });
+
+    // Starta körning
+    const run = await openai.beta.threads.runs.create(thread.id, {
+      assistant_id: assistant.id,
+    });
+
+    // Vänta på att körningen är klar (max 30 sekunder)
+    let retries = 0;
+    let completedRun = null;
+
+    while (retries < 30) {
+      const runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+      if (runStatus.status === "completed") {
+        completedRun = runStatus;
+        break;
+      } else if (["failed", "cancelled"].includes(runStatus.status)) {
+        return { success: false, answer: "Ett fel uppstod vid bearbetning. Försök igen." };
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      retries++;
+    }
+
+    if (!completedRun) {
+      return { success: false, answer: "Tidsgräns nådd. Försök igen om en stund." };
+    }
+
+    // Hämta assistentens svar
+    const messages = await openai.beta.threads.messages.list(thread.id);
+    const assistantMessages = messages.data.filter(m => m.role === "assistant");
+
+    if (assistantMessages.length === 0) {
+      return { success: false, answer: "Inget svar kunde genereras. Försök igen." };
+    }
+
+    const latestMessage = assistantMessages[0];
+    const textContent = latestMessage.content
+      .filter(c => c.type === "text")
+      .map(c => c.text.value)
+      .join("\n");
+
+    return {
+      success: true,
+      answer: textContent || "Tyvärr kunde inget svar genereras."
+    };
+
+  } catch (error) {
+    console.error("❌ Fel vid anrop till OpenAI:", error);
+    return { success: false, answer: "Något gick fel. Försök igen senare." };
+  }
+}
+
+module.exports = { queryOpenAI };

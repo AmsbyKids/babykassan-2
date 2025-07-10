@@ -1,0 +1,93 @@
+const OpenAI = require("openai");
+const { getVerifiedCurrentDate } = require("./swedishDateCalculator");
+
+let openai;
+let assistant;
+
+async function setupOpenAI() {
+  if (!process.env.OPENAI_API_KEY) {
+    console.error("⚠️ OPENAI_API_KEY saknas i miljövariabler!");
+    process.exit(1);
+  }
+
+  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const { createAssistant } = require("./openai.service");
+  assistant = await createAssistant(openai);
+  console.log(`✅ OpenAI konfigurerad med assistent: ${assistant.id}`);
+}
+
+async function queryOpenAI(query, contextInfo = '') {
+  try {
+    if (!openai || !assistant) await setupOpenAI();
+
+    const verifiedDateData = getVerifiedCurrentDate();
+
+    if (
+      verifiedDateData.fullDate.includes("8 mars") ||
+      verifiedDateData.date.endsWith("-03-08")
+    ) {
+      return {
+        success: false,
+        answer: "🚫 Systemet blockerar alla svar kopplade till datumet '8 mars'."
+      };
+    }
+
+    const prompt = `
+ANVÄNDARENS FRÅGA:
+${query}
+
+📅 DAGENS VERIFIERADE DATUM:
+- Fullt datum: ${verifiedDateData.fullDate}
+- Veckodag: ${verifiedDateData.weekday}
+- ISO: ${verifiedDateData.iso}
+- Timestamp: ${verifiedDateData.timestamp}
+
+📌 DIREKTIV TILL ASSISTENTEN:
+- Börja svaret med: "Idag den ${verifiedDateData.fullDate} kan jag..."
+- Du får ALDRIG nämna '8 mars'
+- Ge alltid konkreta beräkningar och exakta datum
+- Svara lugnt, harmoniskt och informativt
+- Avsluta med 2–4 följdfrågor
+`;
+
+    const thread = await openai.beta.threads.create();
+    await openai.beta.threads.messages.create(thread.id, {
+      role: "user",
+      content: prompt
+    });
+
+    const run = await openai.beta.threads.runs.create(thread.id, {
+      assistant_id: assistant.id
+    });
+
+    // Vänta på att run:en ska bli klar
+    for (let i = 0; i < 30; i++) {
+      const runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+      if (runStatus.status === "completed") break;
+      if (["failed", "cancelled"].includes(runStatus.status)) {
+        return { success: false, answer: "🚫 GPT-processen avbröts. Försök igen." };
+      }
+      await new Promise(r => setTimeout(r, 1000));
+    }
+
+    const messages = await openai.beta.threads.messages.list(thread.id);
+    const assistantMessage = messages.data.find(m => m.role === "assistant");
+
+    if (!assistantMessage) {
+      return { success: false, answer: "🚫 Inget svar genererades. Försök igen." };
+    }
+
+    const text = assistantMessage.content
+      .filter(c => c.type === "text")
+      .map(c => c.text.value)
+      .join("\n");
+
+    return { success: true, answer: text || "🧐 Svar saknas. Testa att ställa frågan igen." };
+
+  } catch (err) {
+    console.error("❌ Fel vid GPT-anrop:", err.message);
+    return { success: false, answer: "Ett tekniskt fel uppstod. Vänligen försök igen senare." };
+  }
+}
+
+module.exports = { queryOpenAI };

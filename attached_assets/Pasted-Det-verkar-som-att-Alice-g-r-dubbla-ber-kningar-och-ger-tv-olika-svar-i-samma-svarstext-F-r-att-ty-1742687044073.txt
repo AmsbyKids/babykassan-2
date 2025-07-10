@@ -1,0 +1,48 @@
+Det verkar som att Alice gör dubbla beräkningar och ger två olika svar i samma svarstext. För att tydliggöra och förbättra svaret bör du göra följande:
+
+Använd maxbeloppet endast om dagersättningen överstiger det (1250 kr).
+
+Visa tydligt vilken ersättning användaren faktiskt kommer att få (brutto och netto).
+
+Ta bort motsägelser och redundanta beräkningar.
+
+Här är en uppdaterad och tydligare version av svaret som du kan använda som referens:
+
+Sammanfattning:
+Med en årsinkomst på 400 000 kr, och föräldraledighet 4 dagar per vecka från den 1 september i Stockholm, blir din föräldrapenning cirka 10 618 kr per månad efter skatt.
+
+Detaljerade beräkningar:
+1. Beräkning av dagersättning:
+
+SGI: 400 000 kr
+
+Dagersättning: (400 000 kr ÷ 365 dagar) × 0,8 ≈ 877 kr/dag
+(Den maximala ersättningen är 1 250 kr/dag, men detta påverkar dig inte eftersom din ersättning är lägre.)
+
+2. Beräkning av månadsersättning (brutto):
+
+877 kr/dag × 4 dagar/vecka × 4,33 veckor/månad ≈ 15 168 kr/månad
+
+3. Skatt i Stockholm:
+
+Kommunalskatt: 30%
+
+Nettobelopp: 15 168 kr × 0,7 ≈ 10 618 kr/månad efter skatt
+
+Extrafakta:
+Föräldrapenningen är skattepliktig och skatten dras direkt.
+
+Stockholm har en kommunalskatt på cirka 30%.
+
+Följdfrågor:
+
+Planerar du att dela föräldraledigheten med din partner?
+
+Vill du veta hur många föräldradagar du har kvar totalt?
+
+Har du fler barn och vill du optimera ledigheten mellan dem?
+
+Föreslagen ändring i koden (rekommenderad att uppdatera i Replit):
+Justera eller be Replit-assistenten uppdatera funktionen som genererar svar för att ta hänsyn till maxbeloppet på rätt sätt och undvika dubbla och motsägelsefulla beräkningar. Här är ett promptförslag du kan skicka till Replit:
+
+"Uppdatera Alice svarsgenerering så att hon tydligt använder maxbeloppet (1 250 kr/dag) endast om den faktiska beräkningen överskrider detta. Se till att svaret blir tydligt, utan dubbla beräkningar och motsägelser. Inkludera alltid korrekt kommunalskatt och presentera ett tydligt nettobelopp efter skatt. Avsluta alltid med relevanta följdfrågor.

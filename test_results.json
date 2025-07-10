@@ -1,0 +1,98 @@
+{
+  "timestamp": "2025-03-09T22:51:33.391Z",
+  "overallPassRate": 0.3,
+  "totalQuestions": 10,
+  "totalPassed": 3,
+  "categoryResults": [
+    {
+      "category": "Grundläggande förståelse",
+      "results": [
+        {
+          "question": "Hur många föräldradagar får man totalt per barn?",
+          "passed": true,
+          "reason": "Alla förväntade nyckelord hittades",
+          "answer": "## Totalt antal föräldradagar per barn\n\nEnligt de senaste uppdateringarna från Försäkringskassan, so..."
+        },
+        {
+          "question": "När kan man tidigast ta ut föräldrapenning?",
+          "passed": false,
+          "reason": "Saknar förväntade nyckelord",
+          "answer": "### När kan man tidigast ta ut föräldrapenning?\n\nFöräldrapenning kan tas ut från och med barnets föd..."
+        }
+      ],
+      "passRate": 0.5
+    },
+    {
+      "category": "SGI-skydd",
+      "results": [
+        {
+          "question": "Hur skyddar jag min SGI under föräldraledigheten?",
+          "passed": false,
+          "reason": "Saknar förväntade nyckelord",
+          "answer": "För att skydda din sjukpenninggrundande inkomst (SGI) under föräldraledigheten 2025, finns det vissa..."
+        },
+        {
+          "question": "Måste jag ta ut 5 dagar i veckan för att skydda min SGI?",
+          "passed": false,
+          "reason": "Saknar förväntade nyckelord",
+          "answer": "## Skydd av Sjukpenninggrundande Inkomst (SGI)\n\nFör att skydda din sjukpenninggrundande inkomst (SGI..."
+        }
+      ],
+      "passRate": 0
+    },
+    {
+      "category": "2025-regler",
+      "results": [
+        {
+          "question": "Vad händer med föräldrapenning på sjukpenningnivå för arbetsfria dagar från april 2025?",
+          "passed": true,
+          "reason": "Alla förväntade nyckelord hittades",
+          "answer": "## Föräldrapenning på Sjukpenningnivå för Arbetsfria Dagar från April 2025\n\nFrån och med den 1 april..."
+        },
+        {
+          "question": "Ändras reglerna för dubbeldagar i april 2025?",
+          "passed": true,
+          "reason": "Alla förväntade nyckelord hittades",
+          "answer": "## Ändringar för Dubbeldagar i April 2025\n\nBaserat på den information jag har från kunskapsbasen, fi..."
+        }
+      ],
+      "passRate": 1
+    },
+    {
+      "category": "Felaktiga påståenden",
+      "results": [
+        {
+          "question": "Stämmer det att man kan ta ut föräldrapenning på sjukpenningnivå för arbetsfria dagar utan att ta ut någon mer dag från april 2025?",
+          "passed": false,
+          "reason": "Saknar förväntade nyckelord",
+          "answer": "## Svar på din fråga\n\nJa, från och med den 1 april 2025 kan du ta ut föräldrapenning på sjukpenningn..."
+        },
+        {
+          "question": "Måste jag ta ut 5 hela föräldrapenningdagar per vecka för att skydda min SGI?",
+          "passed": false,
+          "reason": "Saknar förväntade nyckelord",
+          "answer": "## Skydd av Sjukpenninggrundande Inkomst (SGI)\n\nFör att skydda din sjukpenninggrundande inkomst (SGI..."
+        }
+      ],
+      "passRate": 0
+    },
+    {
+      "category": "Irrelevanta frågor",
+      "results": [
+        {
+          "question": "Vad tycker du om fotboll?",
+          "passed": false,
+          "reason": "Förväntade irrelevant svar",
+          "answer": "Jag är specialiserad på att ge information om svensk föräldrapenning 2025 och kan därför inte ge åsi..."
+        },
+        {
+          "question": "Berätta om Stockholms historia",
+          "passed": false,
+          "reason": "Förväntade irrelevant svar",
+          "answer": "Jag har tyvärr ingen information om Stockholms historia i min nuvarande kunskapsbas. Om du har frågo..."
+        }
+      ],
+      "passRate": 0
+    }
+  ]
+}

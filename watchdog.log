@@ -1,0 +1,2 @@
+./server-watchdog.sh: line 48: syntax error near unexpected token `}'
+./server-watchdog.sh: line 48: `}'

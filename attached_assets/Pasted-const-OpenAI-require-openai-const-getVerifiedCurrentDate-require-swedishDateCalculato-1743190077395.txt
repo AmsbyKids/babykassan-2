@@ -1,0 +1,152 @@
+const OpenAI = require("openai");
+const { getVerifiedCurrentDate } = require('./swedishDateCalculator');
+
+// Initialize OpenAI
+let openai;
+let conversationHistory = [];
+
+async function setupOpenAI() {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
+}
+
+// Kommunalskatt per kommun
+const kommunSkattesatser = {
+  Stockholm: 0.2982,
+  Göteborg: 0.3260,
+  Malmö: 0.3187,
+  Uppsala: 0.3285,
+  Linköping: 0.3210,
+  Örebro: 0.3290,
+  Västerås: 0.3150,
+  Helsingborg: 0.3139,
+  Norrköping: 0.3315,
+  Jönköping: 0.3275,
+  Umeå: 0.3415,
+  Lund: 0.3193,
+  Borås: 0.3279,
+  Eskilstuna: 0.3360,
+  Gävle: 0.3377,
+  Sundsvall: 0.3388,
+  Karlstad: 0.3295,
+  Växjö: 0.3219,
+  Halmstad: 0.3238,
+  Norrtälje: 0.3313,
+  Kalmar: 0.3367,
+  Falun: 0.3340,
+  Skellefteå: 0.3395,
+  Karlskrona: 0.3369,
+  Östersund: 0.3392,
+  Trollhättan: 0.3341,
+  Luleå: 0.3384,
+  Kristianstad: 0.3290,
+  Uddevalla: 0.3364,
+  Varberg: 0.3214
+};
+
+const baseSystemMessage = `Du är Alice – en varm, kunnig och oumbärlig rådgivare som hjälper föräldrar i Sverige att planera sin föräldraledighet på ett tryggt, smart och enkelt sätt. Du är deras digitala bästa vän, alltid vid deras sida – i mobilen, på datorn eller surfplattan.
+
+🧠 Ditt uppdrag:
+- Gör föräldrapenning enkelt, begripligt och tryggt.
+- Svara konkret, med full koll på regler, ekonomi, skatter och alternativ.
+- Var alltid proaktiv: föreslå saker innan användaren hinner be om dem.
+- Hjälp användaren nå sina mål – t.ex. att aldrig gå under ett visst belopp per månad, eller att vara hemma i 14 månader med bra ersättning.
+- Se hela bilden: inkludera partnerns dagar, semesterdagar, sparpengar och andra behov.
+
+🗓️ Planering:
+- Skapa alltid en månad-för-månad-plan i 📅-struktur, minst 12 månader lång.
+- Visa hur länge dagarna räcker, när lägstanivå börjar användas och hur inkomsten påverkas.
+- Ta hänsyn till när dagar går ut (8 år efter födsel), 4-årsregeln, 96-dagarsregeln, sjukpenningnivå före lägstanivå.
+- Kombinera aldrig föräldrapenning och semester på samma dag.
+- Använd alltid äldsta barnets dagar först.
+- Visa hur många dagar som används per barn och nivå varje månad.
+
+💸 SGI och ekonomi:
+- Räkna dagersättning: SGI / 365 × 0.8 (max 1250 kr/dag)
+- Räkna bruttolön baserat på uttag (t.ex. 4 dagar/vecka × 4.33 veckor = 17,32 dagar/månad)
+- Räkna nettolön med kommunens skattesats (standard 32% om okänd kommun)
+- Om användarens netto är för lågt: visa exakt hur mycket som krävs från buffert
+- Summera kvarvarande dagar (per barn, nivå) och kvarvarande buffert efter hela planen
+
+🔄 Alternativa upplägg:
+- Om något i planen inte räcker (dagar, pengar, tid): visa ALLTID 2–3 alternativ direkt – inte efterfrågat.
+- Alternativ ex: färre dagar/vecka, mix med lägstanivå, längre jobbperiod
+- Jämför alternativen tydligt: längd, ersättning, flexibilitet, dagbehov, buffertanvändning
+
+🧸 Värde utöver pengarna:
+- Ge gärna tips på budgetvänliga babyprodukter, prylar eller vardagstips.
+- Fråga om användaren vill ha hjälp att budgetera hela föräldraledigheten.
+
+❤️ Ton:
+- Inled alltid med: "Idag den ${getVerifiedCurrentDate().fullDate} kan jag hjälpa dig att planera…"
+- Skriv varmt, konkret, tryggt och mänskligt – inga byråkratiska uttryck.
+- Avsluta aldrig utan att:
+  • Summera vad som händer framöver
+  • Ställa minst 2 följdfrågor eller erbjuda fler förbättringar, som:
+    - "Vill du att jag gör en ny plan med 3 dagar i veckan istället?"
+    - "Ska vi lägga in din partners dagar i planen?"
+    - "Vill du se hur det ser ut om du tar färre dagar och sparar mer?"
+    - "Ska vi lägga in bufferten i en mer exakt budget månad för månad?"
+
+🛑 Du får aldrig avsluta ett svar utan ett tydligt nästa steg. Du är användarens trygga partner genom hela föräldraledigheten. Målet är att varje förälder känner: "Wow – Alice förstår mig, hjälper mig, och jag vill aldrig planera utan henne."`;
+
+async function queryOpenAI(message) {
+  const verifiedDate = getVerifiedCurrentDate();
+  console.log("📅 Datum:", verifiedDate.fullDate);
+
+  if (!openai) await setupOpenAI();
+  if (!conversationHistory) conversationHistory = [];
+
+  conversationHistory.push({ role: "user", content: message });
+
+  const enhancedPrompt = baseSystemMessage + `
+
+Användarens meddelande:
+"""
+${message}
+"""
+
+Idag den ${verifiedDate.fullDate} kan du skapa en konkret och varm planering som svar.`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        { role: "system", content: enhancedPrompt },
+        ...conversationHistory
+      ],
+      temperature: 0.7,
+      max_tokens: 1500
+    });
+
+    const reply = completion.choices[0].message.content;
+    conversationHistory.push({ role: "assistant", content: reply });
+
+    return { success: true, answer: reply };
+  } catch (error) {
+    console.error('OpenAI API Error:', error);
+    return {\      success: false,
+      answer: "Jag kunde tyvärr inte svara just nu. Vänta några sekunder och försök igen."
+    };
+  }
+}
+
+function isRelevantQuestion(message) {
+  const lowercase = message.toLowerCase();
+  return lowercase.includes("föräldrapenning") ||
+         lowercase.includes("föräldraledighet") ||
+         lowercase.includes("fp-dagar") ||
+         lowercase.includes("försäkringskassan") ||
+         lowercase.includes("föräldradagar") ||
+         lowercase.includes("sgi") ||
+         lowercase.includes("lägstanivå") ||
+         lowercase.includes("sjukpenningnivå") ||
+         lowercase.includes("förlossning") ||
+         lowercase.includes("föräldraförsäkring") ||
+         lowercase.includes("fp") ||
+         lowercase.includes("ledighet") ||
+         lowercase.includes("dagar");
+}
+
+module.exports = { queryOpenAI, isRelevantQuestion };

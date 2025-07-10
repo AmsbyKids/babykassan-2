@@ -1,0 +1,28 @@
+=== SERVEROMSTART Fri 04 Apr 2025 03:41:16 PM UTC ===
+2. Kontrollera port 8080rocesser
+⚠️ Port 8080 används – försöker frigöra...
+8080/tcp:             2281
+3. Rensar loggar
+4. Sätter rättigheter
+5. Startar huvudserver (index.js)
+📦 Server PID: 2333
+6. Startar aiQueryService
+🤖 AI Service PID: 2362
+7. Startar watchdog
+🔍 Watchdog PID: 2371
+8. Verifierar att processerna körs...
+✅ Huvudserver är igång (PID: 2333)
+⚠️ Försök 1/3 för AI Service...
+⚠️ Försök 1/3 för AI Service...
+⚠️ Försök 1/3 för AI Service...
+❌ AI Service (PID: 2362) startade inte efter 3 försök
+⚠️ Försök 1/3 för Watchdog...
+⚠️ Försök 1/3 för Watchdog...
+⚠️ Försök 1/3 för Watchdog...
+❌ Watchdog (PID: 2371) startade inte efter 3 försök
+❌ En eller flera processer startade inte korrekt!
+runner    2162  0.2  0.0 1095644 49896 ?       Sl   15:41   0:00 /nix/store/wfxq6w9bkp5dcfr8yb6789b0w7128gnb-nodejs-20.18.1/bin/node /nix/store/9cd76kqpml5gkw8jjnjx0flwdf0a1gv1-typescript-language-server-4.3.3/lib/node_modules/typescript-language-server/lib/cli.mjs --stdio
+runner    2244  0.6  0.1 1029172 85028 ?       Sl   15:41   0:00 /nix/store/wfxq6w9bkp5dcfr8yb6789b0w7128gnb-nodejs-20.18.1/bin/node /nix/store/g6ns6m42fvybfzb2xjppcsfmb6k0jv5x-typescript-5.6.3/lib/node_modules/typescript/lib/tsserver.js --serverMode partialSemantic --useInferredProjectPerProjectRoot --disableAutomaticTypingAcquisition --cancellationPipeName /tmp/4878372b3f1868beb72666f7be99defa/tscancellation* --locale en --validateDefaultNpmLocation --useNodeIpc
+runner    2245  0.6  0.1 1029204 85236 ?       Sl   15:41   0:00 /nix/store/wfxq6w9bkp5dcfr8yb6789b0w7128gnb-nodejs-20.18.1/bin/node /nix/store/g6ns6m42fvybfzb2xjppcsfmb6k0jv5x-typescript-5.6.3/lib/node_modules/typescript/lib/tsserver.js --useInferredProjectPerProjectRoot --cancellationPipeName /tmp/845b0d8b65831213b808668d4360833b/tscancellation* --locale en --validateDefaultNpmLocation --useNodeIpc
+runner    2261  0.5  0.1 1028948 83476 ?       Sl   15:41   0:00 /nix/store/wfxq6w9bkp5dcfr8yb6789b0w7128gnb-nodejs-20.18.1/bin/node /nix/store/g6ns6m42fvybfzb2xjppcsfmb6k0jv5x-typescript-5.6.3/lib/node_modules/typescript/lib/typingsInstaller.js --globalTypingsCacheLocation /home/runner/workspace/.cache/typescript/5.6 --typesMapLocation /nix/store/g6ns6m42fvybfzb2xjppcsfmb6k0jv5x-typescript-5.6.3/lib/node_modules/typescript/lib/typesMap.json --validateDefaultNpmLocation
+runner    2333  0.8  0.0 1000532 60092 pts/2   Sl+  15:41   0:00 /nix/store/wfxq6w9bkp5dcfr8yb6789b0w7128gnb-nodejs-20.18.1/bin/node index.js

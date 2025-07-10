@@ -1,0 +1,83 @@
+✅ Steg 1: Struktur – uppdatera databasen
+Jag skapar ett komplett SQL-schema eller Supabase-modell med:
+
+📊 Tabellen interactions innehåller nu:
+sql
+Kopiera
+-- Exempel fält, för PostgreSQL / Supabase
+CREATE TABLE interactions (
+  id UUID PRIMARY KEY,
+  timestamp TIMESTAMP DEFAULT now(),
+  session_id TEXT,
+  user_id TEXT,
+  device_type TEXT,
+  browser TEXT,
+  language TEXT,
+  kommun TEXT,
+  region TEXT,
+  postal_code TEXT,
+  income_level TEXT,
+  familjesituation TEXT,
+  antal_barn INT,
+  barn_fodelsear INT[],
+  sgi INT,
+  plan_startdatum DATE,
+  plan_slutdatum DATE,
+  uttag_dagar_per_vecka INT,
+  planerade_dagar_total INT,
+  beraknad_ersattning INT,
+  semesterperiod BOOLEAN,
+  sparar_pengar BOOLEAN,
+  målsparande TEXT,
+  riskvilja TEXT,
+  har_gravidforsakring BOOLEAN,
+  har_barnforsakring BOOLEAN,
+  intresserad_av_forsakring BOOLEAN,
+  bor_med_partner BOOLEAN,
+  partner_ar_ledig_också BOOLEAN,
+  fråga TEXT,
+  svar TEXT,
+  kategori TEXT,
+  tags TEXT[],
+  sentiment_score FLOAT,
+  språkfel BOOLEAN,
+  komplexitet INT,
+
+  -- 🔥 NYTT: Partnerfokuserade fält
+  relevant_product_categories TEXT[], -- ["babykläder", "gravidkläder"]
+  partner_targets TEXT[],             -- ["Polarn o. Pyret", "Jollyroom"]
+  köpbeteende_signal TEXT,            -- "letar vagn"
+  kan_få_relevant_annons BOOLEAN,
+  senast_rekommenderad_partner TEXT
+);
+✅ Steg 2: Logik i din backend (Replit-servern)
+Vi lägger in en funktion i din /api/chat som:
+
+🧠 Analyserar vad frågan handlar om
+
+🔍 Identifierar köpsignaler
+
+🛍️ Fyller i partner_targets och relevant_product_categories
+
+Exempel:
+
+js
+Kopiera
+if (message.includes("overall") || message.includes("vad ska jag köpa")) {
+  logData.relevant_product_categories = ["babykläder", "ytterkläder"];
+  logData.partner_targets = ["Polarn o. Pyret", "Lindex Baby"];
+  logData.köpbeteende_signal = "intresserad av babykläder";
+  logData.kan_få_relevant_annons = true;
+}
+✅ Steg 3: Bygga analysgränssnitt
+Vill du ha:
+
+👁️ En dashboard i Metabase där du kan filtrera per partnerkategori?
+
+📦 Export till Excel/CSV varje månad?
+
+🔔 Notifikation om en ny “värdefull kontakt” med t.ex. tvillingar och hög SGI?
+
+Ska jag börja med:
+
+Skapa en Supabase-databas åt dig med allt detta?

@@ -1,0 +1,108 @@
+const OpenAI = require("openai");
+const fs = require("fs");
+
+let openai;
+let assistant;
+
+async function setupOpenAI() {
+  try {
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("⚠️ OPENAI_API_KEY saknas i miljövariabler!");
+      process.exit(1);
+    }
+
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    const { createAssistant } = require("./openai.service");
+    assistant = await createAssistant(openai);
+
+    console.log(`✅ OpenAI konfigurerad med assistent: ${assistant.id}`);
+    return true;
+  } catch (error) {
+    console.error("❌ Fel vid konfigurering av OpenAI:", error);
+    return false;
+  }
+}
+
+async function queryOpenAI(query) {
+  try {
+    if (!openai || !assistant) {
+      const success = await setupOpenAI();
+      if (!success) {
+        return {
+          success: false,
+          answer: "Kunde inte ansluta till AI-tjänsten."
+        };
+      }
+    }
+
+    const thread = await openai.beta.threads.create();
+
+    await openai.beta.threads.messages.create(thread.id, {
+      role: "user",
+      content: query
+    });
+
+    const run = await openai.beta.threads.runs.create(thread.id, {
+      assistant_id: assistant.id
+    });
+
+    let completedRun;
+    const maxRetries = 30;
+    let retries = 0;
+
+    while (retries < maxRetries) {
+      const runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+      if (runStatus.status === "completed") {
+        completedRun = runStatus;
+        break;
+      } else if (runStatus.status === "failed" || runStatus.status === "cancelled") {
+        return {
+          success: false,
+          answer: "Tyvärr uppstod ett fel vid bearbetning av din fråga. Vänligen försök igen."
+        };
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      retries++;
+    }
+
+    if (!completedRun) {
+      return {
+        success: false,
+        answer: "Tyvärr tog bearbetningen för lång tid. Vänligen försök igen."
+      };
+    }
+
+    const messages = await openai.beta.threads.messages.list(thread.id);
+    const assistantMessages = messages.data.filter(msg => msg.role === "assistant");
+
+    if (assistantMessages.length === 0) {
+      return {
+        success: false,
+        answer: "Inget svar kunde genereras. Vänligen försök igen."
+      };
+    }
+
+    const latestMessage = assistantMessages[0];
+    const textContent = latestMessage.content
+      .filter(content => content.type === "text")
+      .map(content => content.text.value)
+      .join("\n");
+
+    return {
+      success: true,
+      answer: textContent || "Svar saknas. Vänligen försök igen."
+    };
+
+  } catch (error) {
+    console.error("❌ Fel vid anrop till OpenAI:", error);
+    return {
+      success: false,
+      answer: "Ett tekniskt fel uppstod. Försök igen senare."
+    };
+  }
+}
+
+module.exports = { queryOpenAI };

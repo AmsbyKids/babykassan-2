@@ -1,0 +1,152 @@
+const OpenAI = require("openai");
+const fs = require("fs");
+const { getVerifiedCurrentDate } = require("./swedishDateCalculator");
+
+let openai;
+let assistant;
+
+async function setupOpenAI() {
+  try {
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("⚠️ OPENAI_API_KEY saknas i miljövariabler!");
+      process.exit(1);
+    }
+
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    const { createAssistant } = require("./openai.service");
+    assistant = await createAssistant(openai);
+
+    console.log(`✅ OpenAI konfigurerad med assistent: ${assistant.id}`);
+    return true;
+  } catch (error) {
+    console.error("❌ Fel vid konfigurering av OpenAI:", error);
+    return false;
+  }
+}
+
+async function queryOpenAI(query, contextInfo = '') {
+  try {
+    if (!openai || !assistant) {
+      const success = await setupOpenAI();
+      if (!success) {
+        return { success: false, answer: "Kunde inte ansluta till AI-tjänsten." };
+      }
+    }
+
+    const verifiedDateData = getVerifiedCurrentDate();
+
+    // Blockera "8 mars"
+    if (
+      verifiedDateData.fullDate.includes("8 mars") ||
+      verifiedDateData.date.endsWith("-03-08")
+    ) {
+      return {
+        success: false,
+        answer: "Datumfel: '8 mars' är ett förbjudet datum. Systemet har stoppat begäran."
+      };
+    }
+
+    const fullDate = verifiedDateData.fullDate;
+    const isoDate = verifiedDateData.iso;
+    const timestamp = verifiedDateData.timestamp;
+    const weekday = verifiedDateData.weekday;
+
+    // Skapa en thread för denna konversation
+    const thread = await openai.beta.threads.create();
+
+    // Skicka ren text till assistenten
+    await openai.beta.threads.messages.create(thread.id, {
+      role: "user",
+      content: `
+ANVÄNDARENS FRÅGA:
+${query}
+
+📅 DAGENS VERIFIERADE DATUM:
+- Fullt datum: ${fullDate}
+- Veckodag: ${weekday}
+- ISO: ${isoDate}
+- Timestamp: ${timestamp}
+
+📌 VIKTIGA DIREKTIV:
+- Börja svaret med: "Idag den ${fullDate} kan jag..."
+- Använd INTE "8 mars" i någon form
+- Alltid ge exakta datumförslag och beräkna SGI-ersättning
+- Svara lugnt, harmoniskt och konkret
+- Avsluta med följdfrågor
+      `
+    });
+
+    // Kör en run
+    const run = await openai.beta.threads.runs.create(thread.id, {
+      assistant_id: assistant.id,
+    });
+
+    // Vänta på att run:en slutförs
+    let completedRun;
+    const maxRetries = 30;
+    let retries = 0;
+
+    while (retries < maxRetries) {
+      const runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+      if (runStatus.status === "completed") {
+        completedRun = runStatus;
+        break;
+      } else if (runStatus.status === "failed" || runStatus.status === "cancelled") {
+        return {
+          success: false,
+          answer: "Tyvärr uppstod ett fel vid bearbetning av din fråga. Vänligen försök igen."
+        };
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      retries++;
+    }
+
+    if (!completedRun) {
+      return {
+        success: false,
+        answer: "Tyvärr tog bearbetningen av din fråga för lång tid. Vänligen försök igen."
+      };
+    }
+
+    // Hämta alla meddelanden från tråden
+    const messages = await openai.beta.threads.messages.list(thread.id);
+    const assistantMessages = messages.data.filter(msg => msg.role === "assistant");
+
+    if (assistantMessages.length === 0) {
+      return {
+        success: false,
+        answer: "Tyvärr genererades inget svar på din fråga. Vänligen försök igen."
+      };
+    }
+
+    const latestMessage = assistantMessages[0];
+    const textContent = latestMessage.content
+      .filter(content => content.type === "text")
+      .map(content => content.text.value)
+      .join("\n");
+
+    if (!textContent) {
+      return {
+        success: false,
+        answer: "Tyvärr kunde inget svar genereras. Vänligen försök igen."
+      };
+    }
+
+    return {
+      success: true,
+      answer: textContent
+    };
+
+  } catch (error) {
+    console.error("❌ Fel vid anrop till OpenAI:", error);
+    return {
+      success: false,
+      answer: "Ett fel uppstod vid kommunikation med AI-tjänsten. Vänligen försök igen senare."
+    };
+  }
+}
+
+module.exports = { queryOpenAI };
