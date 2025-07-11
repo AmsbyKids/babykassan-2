@@ -152,16 +152,13 @@ async function queryOpenAI(message) {
     console.log("➡️ Nytt meddelande mottaget:", message);
     conversationHistory.push({ role: "user", content: message });
 
-    const enhancedPrompt = `${baseSystemMessage}
-
-Användarens meddelande:
-"""
-${message}
-"""
-
-Svara alltid med en varm, personlig och konkret planering. Börja gärna med något i stil med:
-"Vad roligt att ni planerar föräldraledigheten! Jag hjälper er gärna att räkna ut hur ni bäst kombinerar trygg ekonomi, tid tillsammans och ett smart uttag av dagar. 💛"
-Fortsätt sedan direkt med analysen. Undvik att börja varje svar med "Idag den...".`;
+    const enhancedPrompt =
+  baseSystemMessage + "\n\n" +
+  "Användarens meddelande:\n\"\"\"\n" +
+  message + "\n\"\"\"\n\n" +
+  "Svara alltid med en varm, personlig och konkret planering. Börja gärna med något i stil med:\n" +
+  "\"Vad roligt att ni planerar föräldraledigheten! Jag hjälper er gärna att räkna ut hur ni bäst kombinerar trygg ekonomi, tid tillsammans och ett smart uttag av dagar. 💛\"\n" +
+  "Fortsätt sedan direkt med analysen. Undvik att börja varje svar med \"Idag den...\".";
 
     
 const maxHistory = 4; // t.ex. senaste 4 meddelanden räcker oftast!
