@@ -178,7 +178,7 @@ const completion = await openai.chat.completions.create({
     const reply = completion.choices[0].message.content;
     conversationHistory.push({ role: "assistant", content: reply });
 
-    return { success: true, answer: reply };
+        return { success: true, answer: reply };
   } catch (error) {
     console.error('OpenAI API Error:', error);
     return {
@@ -204,6 +204,7 @@ function isRelevantQuestion(message) {
          lowercase.includes("ledighet") ||
          lowercase.includes("dagar");
 }
+
 
 module.exports = { queryOpenAI, isRelevantQuestion };
 
