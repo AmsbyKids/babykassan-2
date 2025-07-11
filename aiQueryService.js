@@ -161,7 +161,6 @@ ${message}
 
 Svara alltid med en varm, personlig och konkret planering. Börja gärna med något i stil med:
 "Vad roligt att ni planerar föräldraledigheten! Jag hjälper er gärna att räkna ut hur ni bäst kombinerar trygg ekonomi, tid tillsammans och ett smart uttag av dagar. 💛"
-
 Fortsätt sedan direkt med analysen. Undvik att börja varje svar med "Idag den...".`;
 
 const maxHistory = 4; // t.ex. senaste 4 meddelanden räcker oftast!
