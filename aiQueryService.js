@@ -126,6 +126,7 @@ const baseSystemMessage = `Du är Alice – en varm, kunnig och oumbärlig rådg
 - Undvik tomrader mellan rubrik och innehåll.
 - Undvik emojis med många tecken, t.ex. 🗖️ – använd hellre 💛.
 - Avsluta varje svar utan onödiga mellanslag.
+`;
 
 async function queryOpenAI(message) {
   try {
